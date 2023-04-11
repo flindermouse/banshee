@@ -1,15 +1,16 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "bansheeCharacter.h"
+
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AbansheeCharacter
@@ -49,6 +50,8 @@ AbansheeCharacter::AbansheeCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	senseSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("Sense Source"));
 }
 
 void AbansheeCharacter::BeginPlay()
