@@ -17,7 +17,8 @@ class BANSHEE_API AOwlControl : public AAIController
 public:
 	AOwlControl();
 
-	void SenseNoise();
+	UFUNCTION()
+	void HeardNoise(const TArray<AActor*> &instigators);
 
 protected:
 	virtual void BeginPlay() override;
@@ -26,7 +27,10 @@ private:
 	UPROPERTY(EditAnywhere)
 	class UBehaviorTree* behave;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
+	class UAIPerceptionComponent* percept;
+
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	class UAISenseConfig_Hearing* hearConfig;
 
 	//hearing variables

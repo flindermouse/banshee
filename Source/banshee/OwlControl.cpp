@@ -8,7 +8,7 @@
 #include "Perception/AISenseConfig_Hearing.h"
 
 AOwlControl::AOwlControl(){
-    PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception Comp"));
+    percept = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception Comp"));
     hearConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("Hearing Config"));
 }
 
@@ -17,10 +17,15 @@ void AOwlControl::BeginPlay(){
 
     hearConfig->HearingRange = hRange;
     hearConfig->SetMaxAge(maxAge);
+    
+    hearConfig->DetectionByAffiliation.bDetectEnemies = true;
+    hearConfig->DetectionByAffiliation.bDetectFriendlies = true;
+    hearConfig->DetectionByAffiliation.bDetectNeutrals = true;
 
-    PerceptionComponent->ConfigureSense(*hearConfig);
-    PerceptionComponent->SetDominantSense(hearConfig->GetSenseImplementation());
-    //PerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &AOwlControl::SenseNoise);
+    percept->ConfigureSense(*hearConfig);
+    percept->SetDominantSense(hearConfig->GetSenseImplementation());
+
+    percept->OnPerceptionUpdated.AddDynamic(this, &AOwlControl::HeardNoise);
 
     //start behaviour tree
     if(behave){
@@ -28,6 +33,7 @@ void AOwlControl::BeginPlay(){
     }
 }
 
-void AOwlControl::SenseNoise(){
+void AOwlControl::HeardNoise(const TArray<AActor*> &instigators){
+    UE_LOG(LogTemp, Display, TEXT("Heard"));
 
 }

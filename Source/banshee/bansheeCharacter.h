@@ -64,7 +64,7 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	class UAIPerceptionStimuliSourceComponent* senseSource;
 };
 
