@@ -4,6 +4,7 @@
 #include "BTS_FindNewHoverPosition.h"
 
 #include "AIController.h"
+#include "DrawDebugHelpers.h"
 #include "NavigationSystem.h"
 #include "Owl.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -28,13 +29,16 @@ void UBTS_FindNewHoverPosition::TickNode(UBehaviorTreeComponent& OwnerComp, uint
     bool gotPatrol = navSys->GetRandomReachablePointInRadius(OwnerComp.GetAIOwner()->GetPawn()->GetActorLocation(), 
                                                                 owl->GetPatrolRadius(), patrolPoint);
     
+    //set altitude to preffered flying height
+    patrolPoint.Location.Z = owl->GetCruisingAltitude();
+    DrawDebugLine(GetWorld(), owl->GetActorLocation(), patrolPoint.Location, FColor::Red, false, 
+                    5.f, (uint8)0U, 10.f);
+
     if(gotPatrol){
         OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), patrolPoint.Location);
     }
     else{
-        OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), 
-                                                                OwnerComp.GetAIOwner()->GetPawn()->GetActorLocation());
+        //OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), owl->GetActorLocation());
+        OwnerComp.GetBlackboardComponent()->ClearValue(GetSelectedBlackboardKey());
     }
-
- 
 }

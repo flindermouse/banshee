@@ -29,8 +29,27 @@ public:
 	float GetPatrolRadius() const {return patrolRad;}
 	void SetPatrolRadius(float newRad) {patrolRad = newRad;}
 
+	float GetCruisingAltitude() const {return cruiseAlt;}
+	void SetCruisingAltitude(float newAlt) {cruiseAlt = newAlt;}
+
+	float GetMaximumForce() const {return maxForceVel;}
+	void SetMaximumForce(float newMax) {maxForceVel = newMax;}
+
+	TArray<class APerch*> GetPerches() const {return perches;}
+	APerch* GetHomePerch() const {return homePerch;}
+	void SetHomePerch(APerch* newPerch) {homePerch = newPerch;}
+
 private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	float patrolRad = 50.f;
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	float cruiseAlt = 100.f;
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	float maxForceVel = 5000.f;
+
+	TArray<class APerch*> perches;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, 
+		Category = "Perches", meta = (AllowPrivateAccess = "true"))
+	APerch* homePerch;
 
 };

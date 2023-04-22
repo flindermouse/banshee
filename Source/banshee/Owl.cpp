@@ -3,6 +3,9 @@
 
 #include "Owl.h"
 
+#include "EngineUtils.h"
+#include "Perch.h"
+
 // Sets default values
 AOwl::AOwl()
 {
@@ -16,6 +19,16 @@ void AOwl::BeginPlay()
 {
 	Super::BeginPlay();
 	
+    for (TActorIterator<APerch> iter(GetWorld()); iter; ++iter){
+		perches.Add(*iter);
+	}
+
+	if(!perches.IsEmpty()){
+		SetHomePerch(perches[0]);
+	}
+
+	//FVector landZone = GetHomePerch()->GetLandingZone();
+	//UE_LOG(LogTemp, Warning, TEXT("Home Perch - X: %f Y: %f Z: %f"), landZone.X, landZone.Y, landZone.Z);
 }
 
 // Called every frame
