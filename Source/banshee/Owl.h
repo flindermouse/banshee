@@ -43,7 +43,7 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	float patrolRad = 50.f;
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	float cruiseAlt = 100.f;
+	float cruiseAlt = 500.f;
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	float maxForceVel = 5000.f;
 

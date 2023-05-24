@@ -16,13 +16,22 @@ UBTS_FindNearestPerch::UBTS_FindNearestPerch(){
 }
 
 void UBTS_FindNearestPerch::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds){
-    Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);    
+    Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);     
 
-    if(!OwnerComp.GetAIOwner()) return;
-    if(!OwnerComp.GetAIOwner()->GetPawn()) return;
+    if(!OwnerComp.GetAIOwner()){ // return;
+        UE_LOG(LogTemp, Warning, TEXT("no ai controller (BTS_FNP)"));
+        return;
+    }
+    if(!OwnerComp.GetAIOwner()->GetPawn()){ // return;
+        UE_LOG(LogTemp, Warning, TEXT("no ai pawn (BTS_FNP)"));
+        return;
+    }
     
     AOwl* owl = Cast<AOwl>(OwnerComp.GetAIOwner()->GetPawn());
-    if(!owl) return;
+    if(!owl){ // return;
+        UE_LOG(LogTemp, Warning, TEXT("no owl (BTS_FNP)"));
+        return;
+    }
 
     APerch* nearest = owl->GetHomePerch();
     FVector owlLoc = owl->GetActorLocation();
@@ -41,8 +50,11 @@ void UBTS_FindNearestPerch::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* N
 
     if(!nearest){
         UE_LOG(LogTemp, Warning, TEXT("no perch found (BTS_FNP)"));
+        OwnerComp.GetBlackboardComponent()->ClearValue(GetSelectedBlackboardKey());
+        return;
     }
+    
     FVector landZone = nearest->GetLandingZone();
-    UE_LOG(LogTemp, Warning, TEXT("Landing Zone - X: %f Y: %f Z: %f (BTS_FNP)"), landZone.X, landZone.Y, landZone.Z);
+    //UE_LOG(LogTemp, Warning, TEXT("Landing Zone - X: %f Y: %f Z: %f (BTS_FNP)"), landZone.X, landZone.Y, landZone.Z);
     OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), nearest->GetLandingZone()); 
 }

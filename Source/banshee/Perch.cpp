@@ -39,7 +39,9 @@ void APerch::Tick(float DeltaTime)
 void APerch::SetLandingZone(){
 	FBoxSphereBounds bounds = RootComponent->GetLocalBounds();
 	landZone = GetActorLocation();
-	landZone.Z += bounds.BoxExtent.Z;
 	//UE_LOG(LogTemp, Warning, TEXT("Landing Zone - X: %f Y: %f Z: %f"), landZone.X, landZone.Y, landZone.Z);
+	landZone.Z += (bounds.BoxExtent.Z * RootComponent->GetComponentScale().Z);
+	//UE_LOG(LogTemp, Warning, TEXT("Landing Zone - Z: %f"), landZone.Z);
+	
 }
 

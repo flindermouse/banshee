@@ -7,6 +7,13 @@
 
 #include "BTT_FlyTo.generated.h"
 
+
+struct OwlFlightData{
+	FVector destination;
+	bool isInFlight = false;
+	bool flightSuccess;
+};
+
 /**
  * 
  */
@@ -19,12 +26,22 @@ public:
 	UBTT_FlyTo();
 
 protected:
+	virtual void InitializeFromAsset(UBehaviorTree &Asset) override;
+
 	EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory);
 
-private:
-	FTimerHandle handle;
+	void TickTask(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory, float DeltaSeconds);
 
-	UFUNCTION()
-	void AddForceToOwl(class AOwl* owl, FVector origin, FVector destination);
+	uint16 GetInstanceMemorySize() const;
+
+private:
+	EBTNodeResult::Type StartFlight(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory);
+	void MoveOwl(UBehaviorTreeComponent &OwnerComp, OwlFlightData* locMemory, float DeltaSeconds);
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	FBlackboardKeySelector targetLocationKey;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	double targetTolerance = 25.f;
 
 };
