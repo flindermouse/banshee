@@ -10,14 +10,16 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 
+/* test */
+#include "Perch.h"
+/* test */
+
 UBTT_FlyTo::UBTT_FlyTo(){
     NodeName = TEXT("Fly");
     bNotifyTick = true;
 
-    //targetLocationKey.AddVectorFilter(this, GET_MEMBER_NAME_CHECKED(UBTT_FlyTo, targetLocationKey));
-    //targetLocationKey.AllowNoneAsValue(true);
-
-    //UE_LOG(LogTemp, Display, TEXT("location key: %s"), *targetLocationKey.SelectedKeyName.ToString());
+    targetLocationKey.AddVectorFilter(this, GET_MEMBER_NAME_CHECKED(UBTT_FlyTo, targetLocationKey));
+    targetLocationKey.AllowNoneAsValue(true);
 }
 
 void UBTT_FlyTo::InitializeFromAsset(UBehaviorTree &Asset){
@@ -26,6 +28,7 @@ void UBTT_FlyTo::InitializeFromAsset(UBehaviorTree &Asset){
     UBlackboardData* bb = GetBlackboardAsset();
     if(!bb){
         UE_LOG(LogTemp, Warning, TEXT("UBTT_FlyTo InitializeFromAsset: no bb"))
+        return;
     }
 
     targetLocationKey.ResolveSelectedKey(*bb);
@@ -47,15 +50,9 @@ EBTNodeResult::Type UBTT_FlyTo::StartFlight(UBehaviorTreeComponent& OwnerComp, u
 
 	UBlackboardComponent* blackboard  =  OwnerComp.GetBlackboardComponent();
     if(!blackboard) return EBTNodeResult::Failed;
-	
-	//if(targetLocationKey.SelectedKeyType != UBlackboardKeyType_Vector::StaticClass()){
-	//	UE_LOG(LogTemp, Display, TEXT("Invalid key. Expected Vector type, found %s"), *(targetLocationKey.SelectedKeyType ? targetLocationKey.SelectedKeyType->GetName() : FString("?")));
-	//	return EBTNodeResult::Failed;
-	//}
 
-    UE_LOG(LogTemp, Warning, TEXT("%s"), *blackboard->DescribeKeyValue(GetSelectedBlackboardKey(), EBlackboardDescription::Full));
-
-	FVector flightDestination = blackboard->GetValueAsVector(targetLocationKey.SelectedKeyName);
+    //UE_LOG(LogTemp, Warning, TEXT("%s"), *blackboard->DescribeKeyValue(targetLocationKey.SelectedKeyName, EBlackboardDescription::Full));
+    FVector flightDestination = blackboard->GetValueAsVector(targetLocationKey.SelectedKeyName);
 	locMemory->destination = flightDestination;
 
     locMemory->isInFlight = true;
@@ -88,7 +85,8 @@ void UBTT_FlyTo::MoveOwl(UBehaviorTreeComponent &OwnerComp, OwlFlightData* locMe
     if(!owl) return;
     
     FVector direction = (locMemory->destination - owl->GetActorLocation());
-    owl->AddMovementInput(direction);
+    //UE_LOG(LogTemp, Display, TEXT("%f %f %f"), direction.X, direction.Y, direction.Z);
+    owl->AddMovementInput(direction, 1.f);
 
     if(direction.Size() <= targetTolerance){
         locMemory->isInFlight = false;
