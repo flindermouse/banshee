@@ -6,94 +6,59 @@
 #include "AIController.h"
 #include "Owl.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
-#include "Components/CapsuleComponent.h"
-#include "GameFramework/PawnMovementComponent.h"
-
-/* test */
-#include "Perch.h"
-/* test */
 
 UBTT_FlyTo::UBTT_FlyTo(){
     NodeName = TEXT("Fly");
     bNotifyTick = true;
-
-    targetLocationKey.AddVectorFilter(this, GET_MEMBER_NAME_CHECKED(UBTT_FlyTo, targetLocationKey));
-    targetLocationKey.AllowNoneAsValue(true);
-}
-
-void UBTT_FlyTo::InitializeFromAsset(UBehaviorTree &Asset){
-    Super::InitializeFromAsset(Asset);
-
-    UBlackboardData* bb = GetBlackboardAsset();
-    if(!bb){
-        UE_LOG(LogTemp, Warning, TEXT("UBTT_FlyTo InitializeFromAsset: no bb"))
-        return;
-    }
-
-    targetLocationKey.ResolveSelectedKey(*bb);
 }
 
 EBTNodeResult::Type UBTT_FlyTo::ExecuteTask(UBehaviorTreeComponent &OwnerComp, 
                                     uint8 *NodeMemory){
     Super::ExecuteTask(OwnerComp, NodeMemory); 
 
-    EBTNodeResult::Type status = StartFlight(OwnerComp, NodeMemory);
+    if(!OwnerComp.GetAIOwner()) return EBTNodeResult::Failed;
 
-    return status; 
-}
+    if(!OwnerComp.GetAIOwner()->GetPawn()) return EBTNodeResult::Failed;
+ 
+    owl = Cast<AOwl>(OwnerComp.GetAIOwner()->GetPawn());
 
-EBTNodeResult::Type UBTT_FlyTo::StartFlight(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
-{
-	OwlFlightData* locMemory = (OwlFlightData*)NodeMemory;
-    if(!locMemory) return EBTNodeResult::Failed;
-
-	UBlackboardComponent* blackboard  =  OwnerComp.GetBlackboardComponent();
-    if(!blackboard) return EBTNodeResult::Failed;
-
-    //UE_LOG(LogTemp, Warning, TEXT("%s"), *blackboard->DescribeKeyValue(targetLocationKey.SelectedKeyName, EBlackboardDescription::Full));
-    FVector flightDestination = blackboard->GetValueAsVector(targetLocationKey.SelectedKeyName);
-	locMemory->destination = flightDestination;
-
-    locMemory->isInFlight = true;
-
-	return EBTNodeResult::InProgress;
+    return EBTNodeResult::InProgress;
 }
 
 void UBTT_FlyTo::TickTask(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory, float DeltaSeconds){    
-    OwlFlightData* locMemory = (OwlFlightData*)NodeMemory;
-    if(!locMemory) return;
-
-    if(locMemory->isInFlight){
-        MoveOwl(OwnerComp, locMemory, DeltaSeconds);
-        return;
-    }
-
-    EBTNodeResult::Type flightResult = EBTNodeResult::Failed;
-    if(locMemory->flightSuccess){
-        flightResult = EBTNodeResult::Succeeded;
-    }
-
-    FinishLatentTask(OwnerComp, flightResult);
-}
-
-void UBTT_FlyTo::MoveOwl(UBehaviorTreeComponent &OwnerComp, OwlFlightData* locMemory, float DeltaSeconds){
-    if(!OwnerComp.GetAIOwner()) return;
-    if(!OwnerComp.GetAIOwner()->GetPawn()) return;
- 
-    AOwl* owl = Cast<AOwl>(OwnerComp.GetAIOwner()->GetPawn());
-    if(!owl) return;
+    Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
     
-    FVector direction = (locMemory->destination - owl->GetActorLocation());
-    //UE_LOG(LogTemp, Display, TEXT("%f %f %f"), direction.X, direction.Y, direction.Z);
-    owl->AddMovementInput(direction, 1.f);
+    if(!OwnerComp.GetBlackboardComponent()) return;
+    if(!owl) return;
 
-    if(direction.Size() <= targetTolerance){
-        locMemory->isInFlight = false;
-        locMemory->flightSuccess = true;
+    FVector destination = OwnerComp.GetBlackboardComponent()->GetValueAsVector(GetSelectedBlackboardKey());
+    //UE_LOG(LogTemp, Display, TEXT("dest X: %f Y: %f Z: %f"), destination.X, destination.Y, destination.Z);
+    float dist = FVector::Distance(owl->GetActorLocation(), destination);
+
+    //UE_LOG(LogTemp, Display, TEXT("cX: %f  cY: %f  cZ: %f"), owl->GetActorLocation().X, owl->GetActorLocation().Y, owl->GetActorLocation().Z);
+    //UE_LOG(LogTemp, Warning, TEXT("distance: %d"), dist);
+
+    MoveOwl(destination);
+
+    if(dist <= targetTolerance){
+        UE_LOG(LogTemp, Display, TEXT("UBTT_FlyTo TickTask: task successfully completed"));
+        FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded); 
     }
+
 }
 
-uint16 UBTT_FlyTo::GetInstanceMemorySize() const{
-    return sizeof(OwlFlightData);
-}
+void UBTT_FlyTo::MoveOwl(FVector toGo){
+    if(!owl) return;
+
+    FVector direction = (toGo - owl->GetActorLocation()).GetSafeNormal();
+    //UE_LOG(LogTemp, Error, TEXT("%f %f %f"), direction.X, direction.Y, direction.Z);
+    //owl->AddMovementInput(direction, 1.f);
+
+    FRotator toRotate = direction.ToOrientationRotator();
+    owl->SetActorRotation(FMath::RInterpTo(owl->GetActorRotation(), toRotate, 0.016, (400*0.016)));
+
+    FVector toMove = FVector::ZeroVector;
+    toMove.X = 400 * 0.016;
+
+    owl->AddActorLocalOffset(toMove);
+} 
