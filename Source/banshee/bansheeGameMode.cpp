@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "bansheeGameMode.h"
-#include "bansheeCharacter.h"
+#include "Characters/bansheeCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 AbansheeGameMode::AbansheeGameMode()

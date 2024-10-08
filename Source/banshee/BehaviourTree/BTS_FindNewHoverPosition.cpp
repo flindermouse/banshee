@@ -6,7 +6,7 @@
 #include "AIController.h"
 #include "DrawDebugHelpers.h"
 #include "NavigationSystem.h"
-#include "Owl.h"
+#include "../Characters/Owl.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -28,13 +28,13 @@ void UBTS_FindNewHoverPosition::TickNode(UBehaviorTreeComponent& OwnerComp, uint
     const UNavigationSystemV1* navSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(this);
     bool gotPatrol = navSys->GetRandomReachablePointInRadius(OwnerComp.GetAIOwner()->GetPawn()->GetActorLocation(), 
                                                                 owl->GetPatrolRadius(), patrolPoint);
-    
-    //set altitude to preffered flying height
-    patrolPoint.Location.Z = owl->GetCruisingAltitude();
-    DrawDebugLine(GetWorld(), owl->GetActorLocation(), patrolPoint.Location, FColor::Red, false, 
-                    5.f, (uint8)0U, 10.f);
 
     if(gotPatrol){
+        //set altitude to preffered flying height
+        patrolPoint.Location.Z = owl->GetCruisingAltitude();
+        DrawDebugLine(GetWorld(), owl->GetActorLocation(), patrolPoint.Location, FColor::Red, false, 
+                        5.f, (uint8)0U, 10.f);
+
         OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), patrolPoint.Location);
     }
     else{

@@ -8,7 +8,16 @@ public class banshee : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", 
-												"HeadMountedDisplay", "EnhancedInput", "GameplayTasks", "NavigationSystem" });
+		PublicDependencyModuleNames.AddRange(new string[] { 
+			"Core", 
+			"CoreUObject", 
+			"Engine", 
+			"InputCore", 
+			"EnhancedInput", 
+			"GameplayTasks", 
+			"NavigationSystem",
+			"SmartObjectsModule",
+		    "GameplayBehaviorSmartObjectsModule"
+			 });
 	}
 }

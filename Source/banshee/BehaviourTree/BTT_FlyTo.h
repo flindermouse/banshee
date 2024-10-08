@@ -25,10 +25,17 @@ protected:
 	void TickTask(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory, float DeltaSeconds);
 
 private:
-	void MoveOwl(FVector toGo);
+	void MoveOwl(FVector toGo, float DeltaSeconds);
 
 	UPROPERTY(VisibleAnywhere)
 	class AOwl* owl;
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+
+public:
+	UPROPERTY(EditAnywhere)
 	float targetTolerance = 100.f;
+
+	UPROPERTY(EditAnywhere)
+	float speed = 500.f;
+
+
 };

@@ -4,7 +4,7 @@
 #include "BTT_FlyTo.h"
 
 #include "AIController.h"
-#include "Owl.h"
+#include "../Characters/Owl.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTT_FlyTo::UBTT_FlyTo(){
@@ -31,15 +31,16 @@ void UBTT_FlyTo::TickTask(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory, 
     if(!OwnerComp.GetBlackboardComponent()) return;
     if(!owl) return;
 
+    if(!OwnerComp.GetBlackboardComponent()->IsVectorValueSet(GetSelectedBlackboardKey())) return;
+
     FVector destination = OwnerComp.GetBlackboardComponent()->GetValueAsVector(GetSelectedBlackboardKey());
     //UE_LOG(LogTemp, Display, TEXT("dest X: %f Y: %f Z: %f"), destination.X, destination.Y, destination.Z);
+    //UE_LOG(LogTemp, Display, TEXT("cX: %f  cY: %f  cZ: %f"), 
+    //          owl->GetActorLocation().X, owl->GetActorLocation().Y, owl->GetActorLocation().Z);
+
+    MoveOwl(destination, DeltaSeconds);
+
     float dist = FVector::Distance(owl->GetActorLocation(), destination);
-
-    //UE_LOG(LogTemp, Display, TEXT("cX: %f  cY: %f  cZ: %f"), owl->GetActorLocation().X, owl->GetActorLocation().Y, owl->GetActorLocation().Z);
-    //UE_LOG(LogTemp, Warning, TEXT("distance: %d"), dist);
-
-    MoveOwl(destination);
-
     if(dist <= targetTolerance){
         UE_LOG(LogTemp, Display, TEXT("UBTT_FlyTo TickTask: task successfully completed"));
         FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded); 
@@ -47,7 +48,7 @@ void UBTT_FlyTo::TickTask(UBehaviorTreeComponent &OwnerComp, uint8 *NodeMemory, 
 
 }
 
-void UBTT_FlyTo::MoveOwl(FVector toGo){
+void UBTT_FlyTo::MoveOwl(FVector toGo, float DeltaSeconds){
     if(!owl) return;
 
     FVector direction = (toGo - owl->GetActorLocation()).GetSafeNormal();
@@ -55,10 +56,11 @@ void UBTT_FlyTo::MoveOwl(FVector toGo){
     //owl->AddMovementInput(direction, 1.f);
 
     FRotator toRotate = direction.ToOrientationRotator();
-    owl->SetActorRotation(FMath::RInterpTo(owl->GetActorRotation(), toRotate, 0.016, (400*0.016)));
+    owl->SetActorRotation(FMath::RInterpTo(owl->GetActorRotation(), 
+                            toRotate, DeltaSeconds, (speed*DeltaSeconds)));
 
     FVector toMove = FVector::ZeroVector;
-    toMove.X = 400 * 0.016;
+    toMove.X = speed * DeltaSeconds;
 
     owl->AddActorLocalOffset(toMove);
 } 

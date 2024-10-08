@@ -6,8 +6,8 @@
 #include "AIController.h"
 //#include "NavigationSystem.h"
 #include "EngineUtils.h"
-#include "Owl.h"
-#include "Perch.h"
+#include "../Characters/Owl.h"
+#include "../SmartObjects/Perch.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -18,43 +18,42 @@ UBTS_FindNearestPerch::UBTS_FindNearestPerch(){
 void UBTS_FindNearestPerch::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds){
     Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);     
 
-    if(!OwnerComp.GetAIOwner()){ // return;
+    if(!OwnerComp.GetAIOwner()){ 
         UE_LOG(LogTemp, Warning, TEXT("no ai controller (BTS_FNP)"));
         return;
     }
-    if(!OwnerComp.GetAIOwner()->GetPawn()){ // return;
+    if(!OwnerComp.GetAIOwner()->GetPawn()){ 
         UE_LOG(LogTemp, Warning, TEXT("no ai pawn (BTS_FNP)"));
         return;
     }
     
     AOwl* owl = Cast<AOwl>(OwnerComp.GetAIOwner()->GetPawn());
-    if(!owl){ // return;
+    if(!owl){ 
         UE_LOG(LogTemp, Warning, TEXT("no owl (BTS_FNP)"));
         return;
     }
 
-    APerch* nearest = owl->GetHomePerch();
-    FVector owlLoc = owl->GetActorLocation();
-    float nearestDist = MAX_flt, currentDist;
+    APerch* nearestPerch = owl->GetHomePerch();
+    float nearestDist = MAX_flt;
+    float currentDist = 0.f;
 
     for(APerch* perch : owl->GetPerches()){
-        FVector perchLoc = perch->GetActorLocation(); 
-        currentDist = sqrt(pow((owlLoc.X - perchLoc.X), 2) + pow((owlLoc.Y - perchLoc.Y), 2) 
-                            + pow((owlLoc.Z - perchLoc.Z), 2));
+        FVector perchLoc = perch->GetLandingZone(); 
+        currentDist = FVector::DistSquared(owl->GetActorLocation(), perchLoc);
 
         if(currentDist < nearestDist){
             nearestDist = currentDist;
-            nearest = perch;
+            nearestPerch = perch;
         }
     }
 
-    if(!nearest){
+    if(!nearestPerch){
         UE_LOG(LogTemp, Warning, TEXT("no perch found (BTS_FNP)"));
         OwnerComp.GetBlackboardComponent()->ClearValue(GetSelectedBlackboardKey());
         return;
     }
     
-    FVector landZone = nearest->GetLandingZone();
+    FVector landZone = nearestPerch->GetLandingZone();
     //UE_LOG(LogTemp, Warning, TEXT("Landing Zone - X: %f Y: %f Z: %f (BTS_FNP)"), landZone.X, landZone.Y, landZone.Z);
-    OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), nearest->GetLandingZone()); 
+    OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), nearestPerch->GetLandingZone()); 
 }
